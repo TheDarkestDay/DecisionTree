@@ -1,0 +1,4 @@
+Age(q)	Salary(q)	Pledge(d)	History(d)	Credit(g)
+18	12000	Yes	No	No
+18	15000	Yes	No	Yes
+20	18000	No	Good	Yes

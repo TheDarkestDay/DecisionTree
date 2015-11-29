@@ -1,0 +1,19 @@
+canvas {
+    border:2px solid black;
+}
+
+form {
+    display:inline-block;
+    vertical-align: top;
+    margin-left:15px;
+}
+
+.widget {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+.widget label {
+    display:block;
+    margin-bottom:5px;
+}
