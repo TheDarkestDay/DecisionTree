@@ -9,6 +9,10 @@ window.onload = function () {
     var attributes = [];
     var record;
     var strippedType;
+    var unusedAttrCount = 0;
+    var classes;
+    var uniqueDiscreteFieldValues;
+    var splittedSets;
     
     var TreeNode = function () {
         this.entries = [];
@@ -23,6 +27,14 @@ window.onload = function () {
     
     TreeNode.prototype.popEntry = function() {
         this.entries.pop();
+    };
+    
+    TreeNode.prototype.addChild = function(childNode) {
+        this.children.push(childNode);
+    };
+    
+    TreeNode.prototype.removeChild = function() {
+        this.children.pop();
     };
     
     tsvInput.addEventListener('change', function () {
@@ -55,10 +67,37 @@ window.onload = function () {
             record = new Map(); 
             for (var j=0;j<tsvLine.length;j++) {
                 record.set(attributes[j].name,tsvLine[j]);
+                if (attributes[j].type == 'd') {
+                    uniqueValue = true;
+                    for (var k=0;k<uniqueDiscreteFieldValues.length;i++) {
+                        if (uniqueDiscreteFieldValues == tsvLine[j]) {
+                            uniqueValue = false;
+                        }
+                    }
+                    if (uniqueValue) uniqueDiscreteFieldValues.push(tsvLine[j]);
+                };
             };
         };
         root.popEntry();
-        
-        
+        unusedAttrCount = attributes.length;
+        generateTree(root);
     });
+    
+    
+    function generateTree(node) {  
+        if (unusedAttrCount) {
+            for (var i=0;i<attributes.length;i++) {
+                switch(attributes[i].type) {
+                    case 'q':
+                        break;
+                    case 'd':
+                        break;
+                    default:
+                        break;
+                }
+            };
+        } else {
+            
+        }
+    };
 };
