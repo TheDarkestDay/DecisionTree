@@ -8,6 +8,7 @@ window.onload = function () {
     var tsvLine;
     var attributes = [];
     var record;
+    var strippedType;
     
     var TreeNode = function () {
         this.entries = [];
@@ -18,6 +19,10 @@ window.onload = function () {
     
     TreeNode.prototype.addEntry = function (newEntry) {
         this.entries.push(newEntry);
+    };
+    
+    TreeNode.prototype.popEntry = function() {
+        this.entries.pop();
     };
     
     tsvInput.addEventListener('change', function () {
@@ -34,19 +39,26 @@ window.onload = function () {
     learnBtn.addEventListener('click', function (evt) {
         evt.preventDefault();
         dataLines = text.split('\n');
+        attributes = [];
         tsvLine = dataLines[0].split('\t');
         for (var i=0;i<tsvLine.length;i++) {
-            attributes.push(tsvLine[i]);
+            attributes.push({
+                name: tsvLine[i],
+                isUsed: false
+            });
+            strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
+            attributes[i].type = strippedType[1];
         };
+        console.log(attributes);
         for (var i=1;i<dataLines.length;i++) {
             tsvLine = dataLines[i].split('\t');
             record = new Map(); 
             for (var j=0;j<tsvLine.length;j++) {
-                record.set(attributes[j],tsvLine[j]);
+                record.set(attributes[j].name,tsvLine[j]);
             };
-            console.log(record);
-            root.addEntry(record);
         };
-        console.log(root);
+        root.popEntry();
+        
+        
     });
 };
