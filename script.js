@@ -11,8 +11,8 @@ window.onload = function () {
     var strippedType;
     var unusedAttrCount = 0;
     var classes;
-    var uniqueDiscreteFieldValues;
     var splittedSets;
+    var uniqueValue;
     
     var TreeNode = function () {
         this.entries = [];
@@ -52,16 +52,17 @@ window.onload = function () {
         evt.preventDefault();
         dataLines = text.split('\n');
         attributes = [];
+        classes = [];
         tsvLine = dataLines[0].split('\t');
         for (var i=0;i<tsvLine.length;i++) {
             attributes.push({
                 name: tsvLine[i],
-                isUsed: false
+                isUsed: false,
+                values: []
             });
             strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
             attributes[i].type = strippedType[1];
         };
-        console.log(attributes);
         for (var i=1;i<dataLines.length;i++) {
             tsvLine = dataLines[i].split('\t');
             record = new Map(); 
@@ -69,18 +70,27 @@ window.onload = function () {
                 record.set(attributes[j].name,tsvLine[j]);
                 if (attributes[j].type == 'd') {
                     uniqueValue = true;
-                    for (var k=0;k<uniqueDiscreteFieldValues.length;i++) {
-                        if (uniqueDiscreteFieldValues == tsvLine[j]) {
+                    for (var k=0;k<attributes[j].values.length;k++) {
+                        if (attributes[j].values[k] == tsvLine[j]) {
                             uniqueValue = false;
                         }
                     }
-                    if (uniqueValue) uniqueDiscreteFieldValues.push(tsvLine[j]);
+                    if (uniqueValue) attributes[j].values.push(tsvLine[j]);
+                };
+                if (attributes[j].type == 'g') {
+                    uniqueValue = true;
+                    for (var k=0;k<classes.length;k++) {
+                        if (classes[k] == tsvLine[j]) {
+                            uniqueValue = false;
+                        }
+                    }
+                    if (uniqueValue) classes.push(tsvLine[j]);
                 };
             };
         };
         root.popEntry();
         unusedAttrCount = attributes.length;
-        generateTree(root);
+      //  generateTree(root);
     });
     
     
@@ -97,7 +107,7 @@ window.onload = function () {
                 }
             };
         } else {
-            
+            console.log('');
         }
     };
 };
