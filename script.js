@@ -37,6 +37,14 @@ window.onload = function () {
         this.children.pop();
     };
     
+    TreeNode.prototype.getEntries = function() {
+        return this.entries;
+    };
+    
+    TreeNode.prototype.getEntry = function(index) {
+        return this.entries[index];
+    };
+    
     tsvInput.addEventListener('change', function () {
         var file = tsvInput.files[0];
         var reader = new FileReader();
@@ -90,17 +98,30 @@ window.onload = function () {
         };
         root.popEntry();
         unusedAttrCount = attributes.length;
-      //  generateTree(root);
+        generateTree(root);
     });
     
     
-    function generateTree(node) {  
+    function generateTree(node) {
         if (unusedAttrCount) {
             for (var i=0;i<attributes.length;i++) {
+                console.log(attributes[i].name);
+                splittedSets = [];
                 switch(attributes[i].type) {
                     case 'q':
                         break;
                     case 'd':
+                        for (var j=0;j<attributes[i].values.length;j++) {
+                            console.log(attributes[i].values[j]);
+                            splittedSets.push([]);
+                            for (var k=0;k<node.getEntries().length;k++) {
+                                if (node.getEntry(k).get(attributes[i]) == attributes[i].values[j]) {
+                                    splittedSets[j].push(node.getEntry(k));
+                                    console.log(node.getEntry(k));
+                                };
+                            };
+                        };
+                        console.log(splittedSets);
                         break;
                     default:
                         break;
