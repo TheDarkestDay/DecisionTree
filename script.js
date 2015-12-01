@@ -95,6 +95,7 @@ window.onload = function () {
                     if (uniqueValue) classes.push(tsvLine[j]);
                 };
             };
+            root.addEntry(record);
         };
         root.popEntry();
         unusedAttrCount = attributes.length;
@@ -105,19 +106,16 @@ window.onload = function () {
     function generateTree(node) {
         if (unusedAttrCount) {
             for (var i=0;i<attributes.length;i++) {
-                console.log(attributes[i].name);
                 splittedSets = [];
                 switch(attributes[i].type) {
                     case 'q':
                         break;
                     case 'd':
                         for (var j=0;j<attributes[i].values.length;j++) {
-                            console.log(attributes[i].values[j]);
                             splittedSets.push([]);
                             for (var k=0;k<node.getEntries().length;k++) {
-                                if (node.getEntry(k).get(attributes[i]) == attributes[i].values[j]) {
+                                if (node.getEntry(k).get(attributes[i].name) == attributes[i].values[j]) {
                                     splittedSets[j].push(node.getEntry(k));
-                                    console.log(node.getEntry(k));
                                 };
                             };
                         };
