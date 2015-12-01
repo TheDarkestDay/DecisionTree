@@ -9,10 +9,20 @@ window.onload = function () {
     var attributes = [];
     var record;
     var strippedType;
+    var type;
     var unusedAttrCount = 0;
     var classes;
     var splittedSets;
     var uniqueValue;
+    var goalAttributeName;
+    var subsetSum;
+    var maxGain,currGain;
+    var attributeForNextSplit;
+    
+    
+    Math.log2 = Math.log2 || function(x) {
+        return Math.log(x) / Math.LN2;
+    };
     
     var TreeNode = function () {
         this.entries = [];
@@ -63,14 +73,20 @@ window.onload = function () {
         classes = [];
         tsvLine = dataLines[0].split('\t');
         for (var i=0;i<tsvLine.length;i++) {
+            strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
+            if (strippedType[1] == ')') {
+                type = strippedType[0];
+            } else {
+                type = strippedType[1];
+            }
             attributes.push({
                 name: tsvLine[i],
                 isUsed: false,
-                values: []
+                values: [],
+                type: type
             });
-            strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
-            attributes[i].type = strippedType[1];
         };
+        console.log(attributes);
         for (var i=1;i<dataLines.length;i++) {
             tsvLine = dataLines[i].split('\t');
             record = new Map(); 
@@ -87,6 +103,7 @@ window.onload = function () {
                 };
                 if (attributes[j].type == 'g') {
                     uniqueValue = true;
+                    goalAttributeName = attributes[j].name;
                     for (var k=0;k<classes.length;k++) {
                         if (classes[k] == tsvLine[j]) {
                             uniqueValue = false;
@@ -105,28 +122,83 @@ window.onload = function () {
     
     function generateTree(node) {
         if (unusedAttrCount) {
+            maxGain = 0;
             for (var i=0;i<attributes.length;i++) {
                 splittedSets = [];
+                console.log(attributes[i].name);
                 switch(attributes[i].type) {
                     case 'q':
+                        splittedSets = splitByContiniousAttr(node.getEntries(),attributes[i]);
                         break;
                     case 'd':
-                        for (var j=0;j<attributes[i].values.length;j++) {
-                            splittedSets.push([]);
-                            for (var k=0;k<node.getEntries().length;k++) {
-                                if (node.getEntry(k).get(attributes[i].name) == attributes[i].values[j]) {
-                                    splittedSets[j].push(node.getEntry(k));
-                                };
-                            };
-                        };
-                        console.log(splittedSets);
+                        splittedSets = splitSetByDiscreteAttr(node.getEntries(),attributes[i]);
                         break;
                     default:
                         break;
                 }
+                console.log(splittedSets);
+                subsetSum = 0;
+                for (var j=0;j<splittedSets.length;j++) {
+                    subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
+                }
+                currGain = calcEnthropy(node.getEntries())-subsetSum;
+                if (currGain > maxGain) {
+                    maxGain = currGain;
+                    attributeForNextSplit = attributes[i];
+                }
             };
+            console.log(maxGain);
+            console.log(attributeForNextSplit);
         } else {
             console.log('');
         }
+    };
+    
+    function splitSetByDiscreteAttr(set,attr) {
+        var splittedSets = [];
+        for (var i=0;i<attr.values.length;i++) {
+            splittedSets.push([]);
+            for (var j=0;j<set.length;j++) {
+                if (set[j].get(attr.name) == attr.values[i]) {
+                    splittedSets[i].push(set[j]);
+                }
+            }
+        }
+        return splittedSets;
+    };
+    
+    function splitByContiniousAttr(set,attr) {
+        var splittedSets = [];
+        var median = 0;
+        for (var i=0;i<set.length;i++) {
+            median += parseInt(set[i].get(attr.name));
+        };
+        median = median/set.length;
+        console.log(median);
+        splittedSets.push([]);
+        splittedSets.push([]);
+        for (var i=0;i<set.length;i++) {
+            if (parseInt(set[i].get(attr.name)) > median) {
+                splittedSets[1].push(set[i]);
+            } else {
+                splittedSets[0].push(set[i]);
+            }
+        };
+        return splittedSets;
+    };
+    
+    function calcEnthropy(set) {
+        var result = 0;
+        var classMembersCount;
+        for (var i=0;i<classes.length;i++) {
+            classMembersCount = 0;
+            for (var j=0;j<set.length;j++) {
+                if (set[j].get(goalAttributeName) == classes[i]) {
+                    classMembersCount++;
+                };
+            };
+            result += classMembersCount/set.length*Math.log2(classMembersCount/set.length);
+        };
+        return -result;
     };
 };
