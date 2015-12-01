@@ -125,7 +125,6 @@ window.onload = function () {
             maxGain = 0;
             for (var i=0;i<attributes.length;i++) {
                 splittedSets = [];
-                console.log(attributes[i].name);
                 switch(attributes[i].type) {
                     case 'q':
                         splittedSets = splitByContiniousAttr(node.getEntries(),attributes[i]);
@@ -136,15 +135,17 @@ window.onload = function () {
                     default:
                         break;
                 }
-                console.log(splittedSets);
-                subsetSum = 0;
-                for (var j=0;j<splittedSets.length;j++) {
-                    subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
-                }
-                currGain = calcEnthropy(node.getEntries())-subsetSum;
-                if (currGain > maxGain) {
-                    maxGain = currGain;
-                    attributeForNextSplit = attributes[i];
+                if (attributes[i].type != 'g') {
+                    console.log(splittedSets);
+                    subsetSum = 0;
+                    for (var j=0;j<splittedSets.length;j++) {
+                        subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
+                    }
+                    currGain = calcEnthropy(node.getEntries())-subsetSum;
+                    if (currGain > maxGain) {
+                        maxGain = currGain;
+                        attributeForNextSplit = attributes[i];
+                    }
                 }
             };
             console.log(maxGain);
@@ -197,6 +198,9 @@ window.onload = function () {
                     classMembersCount++;
                 };
             };
+            if (classMembersCount == 0) {
+                return 0;
+            }
             result += classMembersCount/set.length*Math.log2(classMembersCount/set.length);
         };
         return -result;
