@@ -18,6 +18,7 @@ window.onload = function () {
     var subsetSum;
     var maxGain,currGain;
     var attributeForNextSplit;
+    var bestPartition;
     
     
     Math.log2 = Math.log2 || function(x) {
@@ -41,6 +42,10 @@ window.onload = function () {
     
     TreeNode.prototype.addChild = function(childNode) {
         this.children.push(childNode);
+    };
+    
+    TreeNode.prototype.getChildNodes = function() {
+        return this.children;
     };
     
     TreeNode.prototype.removeChild = function() {
@@ -86,7 +91,6 @@ window.onload = function () {
                 type: type
             });
         };
-        console.log(attributes);
         for (var i=1;i<dataLines.length;i++) {
             tsvLine = dataLines[i].split('\t');
             record = new Map(); 
@@ -117,8 +121,8 @@ window.onload = function () {
         root.popEntry();
         unusedAttrCount = attributes.length;
         generateTree(root);
+        console.log(root);
     });
-    
     
     function generateTree(node) {
         if (unusedAttrCount) {
@@ -135,8 +139,7 @@ window.onload = function () {
                     default:
                         break;
                 }
-                if (attributes[i].type != 'g') {
-                    console.log(splittedSets);
+                if (attributes[i].type != 'g' && !attributes[i].isUsed) {
                     subsetSum = 0;
                     for (var j=0;j<splittedSets.length;j++) {
                         subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
@@ -145,13 +148,28 @@ window.onload = function () {
                     if (currGain > maxGain) {
                         maxGain = currGain;
                         attributeForNextSplit = attributes[i];
-                    }
-                }
+                        bestPartition = splittedSets;
+                    };
+                };
             };
-            console.log(maxGain);
-            console.log(attributeForNextSplit);
+            for (var i=0;i<attributes.length;i++) {
+                if (attributes[i].name == goalAttributeName) {
+                    attributes[i].isUsed = true;
+                };
+            };
+            for (var i=0;i<bestPartition.length;i++) {
+                var child = new TreeNode();
+                for (var j=0;j<bestPartition[i].length;j++) {
+                    child.addEntry(bestPartition[i][j]);
+                };
+                node.addChild(child);
+            };
+            for (var j=0;j<node.getChildNodes().length;j++) {
+                generateTree(node.getChildNodes()[j]);
+            };
+            unusedAttrCount--;
         } else {
-            console.log('');
+            console.log('Leaf reached');
         }
     };
     
@@ -175,7 +193,6 @@ window.onload = function () {
             median += parseInt(set[i].get(attr.name));
         };
         median = median/set.length;
-        console.log(median);
         splittedSets.push([]);
         splittedSets.push([]);
         for (var i=0;i<set.length;i++) {

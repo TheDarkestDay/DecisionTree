@@ -2,3 +2,12 @@ Age(q)	Salary(q)	Pledge(d)	History(d)	Credit(g)
 18	12000	Yes	No	No
 18	15000	Yes	No	Yes
 20	18000	No	Good	Yes
+20	12000	Yes	Bad	No
+28	20000	Yes	Good	Yes
+28	18000	No	Bad	No
+42	15000	No	No	No
+18	20000	No	Good	Yes
+50	25000	Yes	No	Yes
+19	10000	Yes	Good	No
+18	25000	No	Bad	No
+30	11000	Yes	Good	Yes
