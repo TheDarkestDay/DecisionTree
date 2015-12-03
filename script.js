@@ -149,7 +149,7 @@ window.onload = function () {
         };
         allEntriesInTheSameClass = classMinusReady || classPlusReady
         if (attributes.length && node.getEntries().length && !allEntriesInTheSameClass) {
-            maxGain = 0;
+            maxGain = -1;
             for (var i=0;i<attributes.length;i++) {
                 splittedSets = [];
                 switch(attributes[i].type) {
@@ -168,7 +168,7 @@ window.onload = function () {
                         subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
                     }
                     currGain = calcEnthropy(node.getEntries())-subsetSum;
-                    console.log(attributes[i].name+' = '+currGain);
+                    console.log(attributes[i].name+" = "+currGain);
                     if (currGain > maxGain) {
                         maxGain = currGain;
                         attributeForNextSplit = attributes[i];
@@ -178,6 +178,9 @@ window.onload = function () {
                     attributes.splice(i,1);
                 };
             };
+            console.log(node.getEntries());
+            console.log('Splitting by '+attributeForNextSplit.name);
+            console.log(bestPartition);
             attributes.splice(attributes.indexOf(attributeForNextSplit),1);
             for (var i=0;i<bestPartition.length;i++) {
                 var child = new TreeNode();
