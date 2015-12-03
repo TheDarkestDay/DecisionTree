@@ -19,6 +19,7 @@ window.onload = function () {
     var maxGain,currGain;
     var attributeForNextSplit;
     var bestPartition;
+    var classPlusReady, classMinusReady, allEntriesInTheSameClass;
     
     
     Math.log2 = Math.log2 || function(x) {
@@ -28,9 +29,18 @@ window.onload = function () {
     var TreeNode = function () {
         this.entries = [];
         this.children = [];
+        this.label = '';
     };
     
     var root = new TreeNode();
+    
+    TreeNode.prototype.setLabel = function(lbl) {
+        this.label = lbl;
+    };
+    
+    TreeNode.prototype.getLabel = function() {
+        return this.label;
+    };
     
     TreeNode.prototype.addEntry = function (newEntry) {
         this.entries.push(newEntry);
@@ -86,9 +96,8 @@ window.onload = function () {
             }
             attributes.push({
                 name: tsvLine[i],
-                isUsed: false,
                 values: [],
-                type: type
+                type: type,
             });
         };
         for (var i=1;i<dataLines.length;i++) {
@@ -119,13 +128,27 @@ window.onload = function () {
             root.addEntry(record);
         };
         root.popEntry();
-        unusedAttrCount = attributes.length;
         generateTree(root);
         console.log(root);
     });
     
     function generateTree(node) {
-        if (unusedAttrCount) {
+        classPlusReady = true;
+        classMinusReady = true;
+        for (var j=0;j<node.getEntries().length;j++) {
+            if (node.getEntry(j).get(goalAttributeName) != classes[0]) {
+                classPlusReady = false;
+                break;
+            }
+        };
+        for (var j=0;j<node.getEntries().length;j++) {
+            if (node.getEntry(j).get(goalAttributeName) != classes[1]) {
+                classMinusReady = false;
+                break;
+            }
+        };
+        allEntriesInTheSameClass = classMinusReady || classPlusReady
+        if (attributes.length && node.getEntries().length && !allEntriesInTheSameClass) {
             maxGain = 0;
             for (var i=0;i<attributes.length;i++) {
                 splittedSets = [];
@@ -139,24 +162,23 @@ window.onload = function () {
                     default:
                         break;
                 }
-                if (attributes[i].type != 'g' && !attributes[i].isUsed) {
+                if (attributes[i].type != 'g') {
                     subsetSum = 0;
                     for (var j=0;j<splittedSets.length;j++) {
                         subsetSum += splittedSets[j].length/node.getEntries().length*calcEnthropy(splittedSets[j]);
                     }
                     currGain = calcEnthropy(node.getEntries())-subsetSum;
+                    console.log(attributes[i].name+' = '+currGain);
                     if (currGain > maxGain) {
                         maxGain = currGain;
                         attributeForNextSplit = attributes[i];
                         bestPartition = splittedSets;
                     };
+                } else {
+                    attributes.splice(i,1);
                 };
             };
-            for (var i=0;i<attributes.length;i++) {
-                if (attributes[i].name == goalAttributeName) {
-                    attributes[i].isUsed = true;
-                };
-            };
+            attributes.splice(attributes.indexOf(attributeForNextSplit),1);
             for (var i=0;i<bestPartition.length;i++) {
                 var child = new TreeNode();
                 for (var j=0;j<bestPartition[i].length;j++) {
@@ -167,9 +189,15 @@ window.onload = function () {
             for (var j=0;j<node.getChildNodes().length;j++) {
                 generateTree(node.getChildNodes()[j]);
             };
-            unusedAttrCount--;
         } else {
-            console.log('Leaf reached');
+            var plusClassCount = 0;
+            var minusClassCount = 0;
+            var mostCommonClass = '';
+            for (var j=0;j<node.getEntries().length;j++) {
+                if (node.getEntry(j).get(goalAttributeName) == classes[0]) plusClassCount++; else minusClassCount++;
+            };
+            if (plusClassCount > minusClassCount) mostCommonClass = classes[0]; else mostCommonClass = classes[1];
+            node.setLabel(mostCommonClass);
         }
     };
     
