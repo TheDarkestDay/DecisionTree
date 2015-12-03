@@ -135,21 +135,6 @@ window.onload = function () {
     });
     
     function generateTree(node) {
-       /* classPlusReady = true;
-        classMinusReady = true;
-        for (var j=0;j<node.getEntries().length;j++) {
-            if (node.getEntry(j).get(goalAttributeName) != classes[0]) {
-                classPlusReady = false;
-                break;
-            }
-        };
-        for (var j=0;j<node.getEntries().length;j++) {
-            if (node.getEntry(j).get(goalAttributeName) != classes[1]) {
-                classMinusReady = false;
-                break;
-            }
-        }; 
-        allEntriesInTheSameClass = classMinusReady || classPlusReady; */
         allEntriesInTheSameClass = false;
         if (node.getEntries().length) {
             allEntriesInTheSameClass = true;
