@@ -19,7 +19,8 @@ window.onload = function () {
     var maxGain,currGain;
     var attributeForNextSplit;
     var bestPartition;
-    var classPlusReady, classMinusReady, allEntriesInTheSameClass;
+    var allEntriesInTheSameClass, sameClass;
+    var parentSetStack;
     
     
     Math.log2 = Math.log2 || function(x) {
@@ -86,6 +87,7 @@ window.onload = function () {
         dataLines = text.split('\n');
         attributes = [];
         classes = [];
+        parentSetStack = [];
         tsvLine = dataLines[0].split('\t');
         for (var i=0;i<tsvLine.length;i++) {
             strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
@@ -133,7 +135,7 @@ window.onload = function () {
     });
     
     function generateTree(node) {
-        classPlusReady = true;
+       /* classPlusReady = true;
         classMinusReady = true;
         for (var j=0;j<node.getEntries().length;j++) {
             if (node.getEntry(j).get(goalAttributeName) != classes[0]) {
@@ -146,8 +148,19 @@ window.onload = function () {
                 classMinusReady = false;
                 break;
             }
+        }; 
+        allEntriesInTheSameClass = classMinusReady || classPlusReady; */
+        allEntriesInTheSameClass = false;
+        if (node.getEntries().length) {
+            allEntriesInTheSameClass = true;
+            sameClass = node.getEntry(0).get(goalAttributeName);
+            for (var i=0;i<node.getEntries().length;i++) {
+                if (node.getEntry(i).get(goalAttributeName) != sameClass) {
+                    allEntriesInTheSameClass = false;
+                    break;
+                }
+            }
         };
-        allEntriesInTheSameClass = classMinusReady || classPlusReady
         if (attributes.length && node.getEntries().length && !allEntriesInTheSameClass) {
             maxGain = -1;
             for (var i=0;i<attributes.length;i++) {
@@ -189,19 +202,41 @@ window.onload = function () {
                 };
                 node.addChild(child);
             };
+            parentSetStack.push(node);
             for (var j=0;j<node.getChildNodes().length;j++) {
                 generateTree(node.getChildNodes()[j]);
             };
+            parentSetStack.pop();
         } else {
-            var plusClassCount = 0;
-            var minusClassCount = 0;
-            var mostCommonClass = '';
-            for (var j=0;j<node.getEntries().length;j++) {
-                if (node.getEntry(j).get(goalAttributeName) == classes[0]) plusClassCount++; else minusClassCount++;
+            if (allEntriesInTheSameClass) {
+                node.setLabel(sameClass);
+            } else {
+                if (node.getEntries().length) {
+                    node.setLabel(getMostCommonClass(node));
+                } else {
+                    node.setLabel(getMostCommonClass(parentSetStack[parentSetStack.length-1]));
+                }
             };
-            if (plusClassCount > minusClassCount) mostCommonClass = classes[0]; else mostCommonClass = classes[1];
-            node.setLabel(mostCommonClass);
-        }
+        };
+    };
+    
+    function getMostCommonClass(set) {
+        var memberCounters = [];
+        for (var i=0;i<classes.length;i++) {
+            memberCounters.push(0);
+        };
+        for (var i=0;i<classes.length;i++) {
+            for (var j=0;j<set.getEntries().length;j++) {
+                if (set.getEntry(j).get(goalAttributeName) == classes[i]) memberCounters[i]++;
+            };
+        };
+        var maxIndex = 0;
+        for (var i=0;i<memberCounters.length;i++) {
+            if (memberCounters[i] > memberCounters[maxIndex]) {
+                maxIndex = i;
+            };
+        };
+        return classes[maxIndex];
     };
     
     function splitSetByDiscreteAttr(set,attr) {
