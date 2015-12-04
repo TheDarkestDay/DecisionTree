@@ -3,6 +3,7 @@ window.onload = function () {
     
     var tsvInput = document.getElementById('tsv-input');
     var learnBtn = document.getElementById('learn');
+    var queryForm = document.getElementById('queryForm');
     var text = 'nothing';
     var dataLines;
     var tsvLine;
@@ -130,6 +131,7 @@ window.onload = function () {
             root.addEntry(record);
         };
         root.popEntry();
+        generateQueryForm();
         generateTree(root);
         console.log(root);
     });
@@ -201,6 +203,46 @@ window.onload = function () {
                 } else {
                     node.setLabel(getMostCommonClass(parentSetStack[parentSetStack.length-1]));
                 }
+            };
+        };
+    };
+    
+    function generateQueryForm() {
+        queryForm.innerHTML = "";
+        var fieldContainer;
+        for (var i=0;i<attributes.length;i++) {
+            switch(attributes[i].type) {
+                case 'q':
+                    var inputField = document.createElement('input');
+                    fieldContainer = document.createElement('div');
+                    var fieldLabel = document.createElement('label');
+                    inputField.setAttribute('id',attributes[i].name);
+                    inputField.setAttribute('type','number');
+                    fieldContainer.setAttribute('class','widget');
+                    fieldLabel.setAttribute('for',attributes[i].name);
+                    fieldLabel.innerHTML = attributes[i].name+':';
+                    fieldContainer.appendChild(fieldLabel);
+                    fieldContainer.appendChild(inputField);
+                    queryForm.appendChild(fieldContainer);
+                    break;
+                case 'd':
+                    var dropdownList = document.createElement('select');
+                    var listLabel = document.createElement('label');
+                    fieldContainer = document.createElement('div');
+                    fieldContainer.setAttribute('class','widget');
+                    listLabel.innerHTML = attributes[i].name;
+                    dropdownList.setAttribute('id',attributes[i].name);
+                    for (var j=0;j<attributes[i].values.length;j++) {
+                        var opt = document.createElement('option');
+                        opt.setAttribute('value',attributes[i].values[j]);
+                        opt.innerHTML = attributes[i].values[j];
+                        dropdownList.appendChild(opt);
+                    };
+                    dropdownList.children[0].setAttribute('selected','true');
+                    fieldContainer.appendChild(listLabel);
+                    fieldContainer.appendChild(dropdownList);
+                    queryForm.appendChild(fieldContainer);
+                    break;
             };
         };
     };

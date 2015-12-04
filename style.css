@@ -2,7 +2,13 @@ canvas {
     border:2px solid black;
 }
 
-form {
+body {
+    width:65%;
+    margin-left: auto;
+    margin-right:auto;    
+}
+
+.formContainer {
     display:inline-block;
     vertical-align: top;
     margin-left:15px;
@@ -16,4 +22,13 @@ form {
 .widget label {
     display:block;
     margin-bottom:5px;
+}
+
+#queryForm {
+    border:1px outset gray;
+    padding:15px;
+}
+
+.widget select, .widget input {
+    width:100%;
 }
