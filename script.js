@@ -3,11 +3,13 @@ window.onload = function () {
     
     var tsvInput = document.getElementById('tsv-input');
     var learnBtn = document.getElementById('learn');
-    var queryForm = document.getElementById('queryForm');
+    var queryForm = document.querySelector('#queryForm p');
+    var queryBtn = document.getElementById('query');
     var text = 'nothing';
     var dataLines;
     var tsvLine;
     var attributes = [];
+    var allAttrs = [];
     var record;
     var strippedType;
     var type;
@@ -83,6 +85,15 @@ window.onload = function () {
         reader.readAsText(file);
     });
     
+    queryBtn.addEventListener('click', function(evt) {
+        evt.preventDefault();
+        var queryEntry = new Map();
+        for (var i=0;i<allAttrs.length;i++) {
+            if (allAttrs[i].type != 'g')
+                queryEntry.set(allAttrs[i].name,document.getElementById(allAttrs[i].name).value);
+        };
+    });
+    
     learnBtn.addEventListener('click', function (evt) {
         evt.preventDefault();
         dataLines = text.split('\n');
@@ -131,6 +142,9 @@ window.onload = function () {
             root.addEntry(record);
         };
         root.popEntry();
+        for (var i=0;i<attributes.length;i++) {
+            allAttrs[i] = attributes[i];
+        };
         generateQueryForm();
         generateTree(root);
         console.log(root);
@@ -230,7 +244,7 @@ window.onload = function () {
                     var listLabel = document.createElement('label');
                     fieldContainer = document.createElement('div');
                     fieldContainer.setAttribute('class','widget');
-                    listLabel.innerHTML = attributes[i].name;
+                    listLabel.innerHTML = attributes[i].name+":";
                     dropdownList.setAttribute('id',attributes[i].name);
                     for (var j=0;j<attributes[i].values.length;j++) {
                         var opt = document.createElement('option');
