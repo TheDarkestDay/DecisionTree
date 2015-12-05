@@ -10,6 +10,7 @@ window.onload = function () {
     var tsvLine;
     var attributes = [];
     var allAttrs = [];
+    var attrsInSplittingOrder = [];
     var record;
     var strippedType;
     var type;
@@ -24,6 +25,7 @@ window.onload = function () {
     var bestPartition;
     var allEntriesInTheSameClass, sameClass;
     var parentSetStack;
+    var queryEntry;
     
     
     Math.log2 = Math.log2 || function(x) {
@@ -87,11 +89,37 @@ window.onload = function () {
     
     queryBtn.addEventListener('click', function(evt) {
         evt.preventDefault();
-        var queryEntry = new Map();
+        queryEntry = new Map();
         for (var i=0;i<allAttrs.length;i++) {
             if (allAttrs[i].type != 'g')
                 queryEntry.set(allAttrs[i].name,document.getElementById(allAttrs[i].name).value);
         };
+        var currNode = root;
+            currAttr = {};
+            answer = "";
+        for (var i=0;i<attrsInSplittingOrder.length;i++) {
+            currAttr = attrsInSplittingOrder[i];
+            if (!currNode.getLabel().length) {
+                answer = currNode.getLabel();
+                break;
+            } else {
+                if (currAttr.type == 'q') {
+                    if (parseInt(queryEntry.get(currAttr.name)) > currAttr.splittedBy) {
+                        currNode = currNode.getChildNodes()[1];
+                    } else {
+                        currNode = currNode.getChildNodes()[0];
+                    };
+                } else {  
+                    for (var j=0;j<currNode.getChildNodes().length;j++) {
+                        if (currNode.getChildNodes()[j].getEntry(0).get(currAttr.name) == queryEntry.get(currAttr)) {
+                            currNode = currNode.getChildNodes()[j];
+                            break;
+                        }
+                    };
+                };
+            };
+        };
+        console.log(answer);
     });
     
     learnBtn.addEventListener('click', function (evt) {
@@ -195,6 +223,10 @@ window.onload = function () {
             console.log(node.getEntries());
             console.log('Splitting by '+attributeForNextSplit.name);
             console.log(bestPartition);
+            if (attributeForNextSplit.type == 'q') {
+                attributeForNextSplit.splittedBy = calcMedian(node.getEntries(),attributeForNextSplit);
+            };
+            attrsInSplittingOrder.push(attributeForNextSplit);
             attributes.splice(attributes.indexOf(attributeForNextSplit),1);
             for (var i=0;i<bestPartition.length;i++) {
                 var child = new TreeNode();
@@ -219,6 +251,29 @@ window.onload = function () {
                 }
             };
         };
+    };
+    
+   /* function traverseTree(node,attr) {
+        if (!node.label.length) {
+            return node.getLabel();
+        } else {
+            if (attr.type == 'q') {
+                if (parseInt(queryEntry.get(attr.name)) > node.splittedBy )
+                    return traverseTree(node.getChildNodes()[1]);
+                else 
+                    return traverseTree()
+            } else {
+                
+            };
+        };
+    }; */
+    
+    function calcMedian(set,attribute) {
+        var result = 0;
+        for (var i=0;i<set.length;i++) {
+            result += parseInt(set[i].get(attribute.name));
+        };
+        return result/set.length;
     };
     
     function generateQueryForm() {
@@ -295,11 +350,7 @@ window.onload = function () {
     
     function splitByContiniousAttr(set,attr) {
         var splittedSets = [];
-        var median = 0;
-        for (var i=0;i<set.length;i++) {
-            median += parseInt(set[i].get(attr.name));
-        };
-        median = median/set.length;
+        var median = calcMedian(set,attr);
         splittedSets.push([]);
         splittedSets.push([]);
         for (var i=0;i<set.length;i++) {
