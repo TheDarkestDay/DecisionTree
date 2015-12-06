@@ -5,6 +5,7 @@ window.onload = function () {
     var learnBtn = document.getElementById('learn');
     var queryForm = document.querySelector('#queryForm p');
     var queryBtn = document.getElementById('query');
+    var answerSpan = document.getElementById('answer');
     var text = 'nothing';
     var dataLines;
     var tsvLine;
@@ -95,11 +96,11 @@ window.onload = function () {
                 queryEntry.set(allAttrs[i].name,document.getElementById(allAttrs[i].name).value);
         };
         var currNode = root;
-            currAttr = {};
-            answer = "";
+        var currAttr = {};
+        var answer = "";
         for (var i=0;i<attrsInSplittingOrder.length;i++) {
             currAttr = attrsInSplittingOrder[i];
-            if (!currNode.getLabel().length) {
+            if (currNode.getLabel() != "") {
                 answer = currNode.getLabel();
                 break;
             } else {
@@ -111,7 +112,7 @@ window.onload = function () {
                     };
                 } else {  
                     for (var j=0;j<currNode.getChildNodes().length;j++) {
-                        if (currNode.getChildNodes()[j].getEntry(0).get(currAttr.name) == queryEntry.get(currAttr)) {
+                        if (currNode.getChildNodes()[j].getEntry(0).get(currAttr.name) == queryEntry.get(currAttr.name)) {
                             currNode = currNode.getChildNodes()[j];
                             break;
                         }
@@ -119,7 +120,7 @@ window.onload = function () {
                 };
             };
         };
-        console.log(answer);
+        answerSpan.innerHTML = answer;
     });
     
     learnBtn.addEventListener('click', function (evt) {
