@@ -27,7 +27,30 @@ window.onload = function () {
     var allEntriesInTheSameClass, sameClass;
     var parentSetStack;
     var queryEntry;
+    var graph;
+    var chart;
+    var chartConfig;
     
+ /*  var simple_chart_config = {
+    chart: {
+        container: "#graph-container"
+    },
+    
+    nodeStructure: {
+        text: { name: "Parent node" },
+        children: [
+            {
+                text: { name: "First child" }
+            },
+            {
+                text: { name: "Second child" }
+            }
+        ]
+    }
+}; 
+    
+    
+    var my_chart = new Treant(simple_chart_config); */
     
     Math.log2 = Math.log2 || function(x) {
         return Math.log(x) / Math.LN2;
@@ -129,6 +152,12 @@ window.onload = function () {
         attributes = [];
         classes = [];
         parentSetStack = [];
+        graph = {
+            text: {
+                name: ''
+            },
+            children: []
+        };
         tsvLine = dataLines[0].split('\t');
         for (var i=0;i<tsvLine.length;i++) {
             strippedType = tsvLine[i].slice(tsvLine[i].length-3,-1);
@@ -175,11 +204,19 @@ window.onload = function () {
             allAttrs[i] = attributes[i];
         };
         generateQueryForm();
-        generateTree(root);
+        generateTree(root,graph);
         console.log(root);
+        console.log(graph);
+        chartConfig = {
+            chart: {
+                container: '#graph-container'
+            },
+            nodeStructure: graph
+        };
+        chart = new Treant(chartConfig);
     });
-    
-    function generateTree(node) {
+        
+    function generateTree(node,graph) {
         allEntriesInTheSameClass = false;
         if (node.getEntries().length) {
             allEntriesInTheSameClass = true;
@@ -224,8 +261,39 @@ window.onload = function () {
             console.log(node.getEntries());
             console.log('Splitting by '+attributeForNextSplit.name);
             console.log(bestPartition);
+            graph.text.name = attributeForNextSplit.name;
             if (attributeForNextSplit.type == 'q') {
                 attributeForNextSplit.splittedBy = calcMedian(node.getEntries(),attributeForNextSplit);
+                graph.children.push({
+                    text: { name:'<'+attributeForNextSplit.splittedBy},
+                    children: [{
+                        text: {
+                            name: ''
+                        },
+                        children:[]
+                    }]
+                });
+                graph.children.push({
+                    text: { name:'>'+attributeForNextSplit.splittedBy },
+                    children: [{
+                        text:{
+                            name: ''
+                        },
+                        children:[]
+                    }]
+                });
+            } else {
+                for (var k=0;k<attributeForNextSplit.values.length;k++) {
+                    graph.children.push({
+                        text:{ name: attributeForNextSplit.values[k]},
+                        children: [{
+                            text: { 
+                                name: ''
+                            },
+                            children:[]
+                        }]
+                    });
+                };
             };
             attrsInSplittingOrder.push(attributeForNextSplit);
             attributes.splice(attributes.indexOf(attributeForNextSplit),1);
@@ -238,7 +306,7 @@ window.onload = function () {
             };
             parentSetStack.push(node);
             for (var j=0;j<node.getChildNodes().length;j++) {
-                generateTree(node.getChildNodes()[j]);
+                generateTree(node.getChildNodes()[j],graph.children[j].children[0]);
             };
             parentSetStack.pop();
         } else {
@@ -251,23 +319,9 @@ window.onload = function () {
                     node.setLabel(getMostCommonClass(parentSetStack[parentSetStack.length-1]));
                 }
             };
+            graph.text.name = node.getLabel();
         };
     };
-    
-   /* function traverseTree(node,attr) {
-        if (!node.label.length) {
-            return node.getLabel();
-        } else {
-            if (attr.type == 'q') {
-                if (parseInt(queryEntry.get(attr.name)) > node.splittedBy )
-                    return traverseTree(node.getChildNodes()[1]);
-                else 
-                    return traverseTree()
-            } else {
-                
-            };
-        };
-    }; */
     
     function calcMedian(set,attribute) {
         var result = 0;
