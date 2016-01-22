@@ -31,26 +31,6 @@ window.onload = function () {
     var chart;
     var chartConfig;
     
- /*  var simple_chart_config = {
-    chart: {
-        container: "#graph-container"
-    },
-    
-    nodeStructure: {
-        text: { name: "Parent node" },
-        children: [
-            {
-                text: { name: "First child" }
-            },
-            {
-                text: { name: "Second child" }
-            }
-        ]
-    }
-}; 
-    
-    
-    var my_chart = new Treant(simple_chart_config); */
     
     Math.log2 = Math.log2 || function(x) {
         return Math.log(x) / Math.LN2;
@@ -88,9 +68,6 @@ window.onload = function () {
         return this.children;
     };
     
-    TreeNode.prototype.removeChild = function() {
-        this.children.pop();
-    };
     
     TreeNode.prototype.getEntries = function() {
         return this.entries;
@@ -435,4 +412,123 @@ window.onload = function () {
         };
         return -result;
     };
+    
+    
+    /*********************************************************************
+    *
+    * TESTS
+    *
+    \*********************************************************************/
+    
+    
+    describe('Tree node', function() {
+        var testNode = new TreeNode(),
+            testMap = new Map(),
+            testChild = new TreeNode();
+       
+        it('initially should have empty label', function() {
+            expect(testNode.label).toEqual('');
+        });
+        
+        it('initially should have no entries', function() {
+            expect(testNode.entries.length).toEqual(0);
+        });
+        
+        it('initially should have no children', function() {
+            expect(testNode.children.length).toEqual(0);
+        });
+        
+        it('allows setting label through setLabel()', function() {
+            testNode.setLabel('yes');
+            expect(testNode.label).toEqual('yes');
+        });
+        
+        it('allows getting label through getLabel()', function() {
+            expect(testNode.getLabel()).toEqual('yes');
+        });
+        
+        it('addEntry should add new entry', function() {
+            testMap.set('Name','Igor');
+            testNode.addEntry(testMap);
+            expect(testNode.entries.length).toEqual(1);
+        });
+        
+        it('getEntries should return array of all entries', function() {
+            expect(testNode.getEntries().length).toEqual(1);
+        });
+        
+        it('getEntry(k) should return entry number k', function() {
+            expect(testNode.getEntry(0)).toEqual(testMap);
+        });
+        
+        it('popEntry should remove entry', function() {
+            testNode.popEntry();
+            expect(testNode.getEntries().length).toEqual(0);
+        });
+        
+        it('addChild should add child', function() {
+            testNode.addChild(testChild);
+            expect(testNode.children.length).toEqual(1);
+        });
+        
+        it('allows to get all child nodes by using getChildNodes', function() {
+            expect(testNode.getChildNodes()[0]).toEqual(testChild);
+        });
+        
+    });
+    
+    describe('calc median function', function() {
+        
+        it('23.3 is a median for 16,33,21', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                ageAttr = {
+                    name: 'age'
+                };
+            
+            entry1.set('age',16);
+            entry2.set('age',33);
+            entry3.set('age',21);
+            
+            var testSet = [entry1, entry2, entry3];
+            
+            expect(calcMedian(testSet,ageAttr)).toEqual(23.333333333333332);
+        });
+        
+        it('42.3 is a median for 81,43,3', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                ageAttr = {
+                    name: 'age'
+                };
+            
+            entry1.set('age',81);
+            entry2.set('age',43);
+            entry3.set('age',3);
+            
+            var testSet = [entry1, entry2, entry3];
+            
+            expect(calcMedian(testSet,ageAttr)).toEqual(42.333333333333336);
+        });
+        
+        it('60 is a median for 17,62,101', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                ageAttr = {
+                    name: 'age'
+                };
+            
+            entry1.set('age',17);
+            entry2.set('age',62);
+            entry3.set('age',101);
+            
+            var testSet = [entry1, entry2, entry3];
+            
+            expect(calcMedian(testSet,ageAttr)).toEqual(60);
+        });
+        
+    });
 };
