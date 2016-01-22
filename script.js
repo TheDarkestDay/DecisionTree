@@ -531,4 +531,118 @@ window.onload = function () {
         });
         
     });
+    
+    describe('get most common class function', function() {
+        goalAttributeName = 'class';
+        classes = ['A','B'];
+        
+        
+        it('should return A for [A,A,A,B]', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                entry4 = new Map();
+            
+            entry1.set('class','A');
+            entry2.set('class','A');
+            entry3.set('class','A');
+            entry4.set('class','B');
+            
+            var testSet = new TreeNode();
+            
+            testSet.addEntry(entry1);
+            testSet.addEntry(entry2);
+            testSet.addEntry(entry3);
+            testSet.addEntry(entry4);
+            
+            expect(getMostCommonClass(testSet)).toEqual('A');
+        });
+        
+        it('should return B for [A,A,B,B,B]', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                entry4 = new Map(),
+                entry5 = new Map();
+            
+            entry1.set('class','A');
+            entry2.set('class','A');
+            entry3.set('class','B');
+            entry4.set('class','B');
+            entry5.set('class','B');
+            
+            var testSet = new TreeNode();
+            
+            testSet.addEntry(entry1);
+            testSet.addEntry(entry2);
+            testSet.addEntry(entry3);
+            testSet.addEntry(entry4);
+            testSet.addEntry(entry5);
+            
+            expect(getMostCommonClass(testSet)).toEqual('B');
+            
+            classes = [];
+            goalAttributeName = '';
+        });
+    });
+    
+    describe('split by continiuous attribute function', function() {      
+        it('should split [24,45,67,43,22] into [24,22] and [45,67,43]', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                entry4 = new Map(),
+                entry5 = new Map(),
+                ageAttr = {
+                    name: 'age'
+                };
+            
+            entry1.set('age',24);
+            entry2.set('age',45);
+            entry3.set('age',67);
+            entry4.set('age',43);
+            entry5.set('age',22);
+            
+            var testSet = [entry1, entry2, entry3, entry4, entry5];
+            
+            var ans = splitByContiniousAttr(testSet,ageAttr);
+            
+            expect(ans.length).toEqual(2);
+            
+            expect(ans[0][0].get('age')).toEqual(24);
+            expect(ans[0][1].get('age')).toEqual(22);
+            expect(ans[1][0].get('age')).toEqual(45);
+            expect(ans[1][1].get('age')).toEqual(67);
+            expect(ans[1][2].get('age')).toEqual(43);       
+        });
+    });
+    
+    describe('split by discrete attr function', function() {
+        it('should split [A,A,B,B] into [A,A] and [B,B]', function() {
+            var entry1 = new Map(),
+                entry2 = new Map(),
+                entry3 = new Map(),
+                entry4 = new Map(),
+                pledgeAttr = {
+                    name: 'pledge',
+                    values: ['A','B']
+                };
+            
+            entry1.set('pledge','A');
+            entry2.set('pledge','A');
+            entry3.set('pledge','B');
+            entry4.set('pledge','B');
+            
+            var testSet = [entry1, entry2, entry3, entry4];
+            
+            var ans = splitSetByDiscreteAttr(testSet,pledgeAttr);
+            
+            expect(ans.length).toEqual(2);
+            
+            expect(ans[0][0].get('pledge')).toEqual('A');
+            expect(ans[0][1].get('pledge')).toEqual('A');
+            expect(ans[1][0].get('pledge')).toEqual('B');
+            expect(ans[1][1].get('pledge')).toEqual('B');
+        });
+    });
 };
